@@ -15,9 +15,8 @@ type ParkingLotManager interface {
 }
 
 const (
-	UNABLE_TO_PARK = "Unable to park the vehicle "
-	FULL_PARKING = "Parking is full "
-	NO_VEHICLE_FOUND = "No vehicle with registration number found "
+	FULL_PARKING = "Sorry, parking lot is full "
+	NOT_FOUND = "Not found "
 )
 
 type parkingLotMgrImpl struct {
@@ -43,9 +42,7 @@ func (p *parkingLotMgrImpl) init(slots int) error {
 func (p *parkingLotMgrImpl) ParkVehicle(v vehicle.Vehicle) (int, error){
 	for _, s := range p.slots{
 		if isFree, _ := s.IsFree(); isFree {
-			if err := s.ParkVehicle(v); err != nil {
-				return -1, errors.New(UNABLE_TO_PARK)
-			}
+			s.ParkVehicle(v)
 			return s.Distance()
 		}
 	}
@@ -62,7 +59,7 @@ func (p *parkingLotMgrImpl) FindVehicleSlot(registrationNumber string) (int, err
 			}
 		}
 	}
-	return -1, errors.New(NO_VEHICLE_FOUND)
+	return -1, errors.New(NOT_FOUND)
 }
 
 func (p *parkingLotMgrImpl) LeaveVehicle(s int) error{
@@ -83,6 +80,9 @@ func (p *parkingLotMgrImpl) SlotsWithColor(color string) ([]slot.ParkingSlot, er
 				slots = append(slots, s)
 			}
 		}
+	}
+	if len(slots) == 0 {
+		return nil, errors.New(NOT_FOUND)
 	}
 	return slots, nil
 }

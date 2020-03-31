@@ -23,7 +23,7 @@ const (
 )
 
 const (
-	NO_CMD = "No command found "
+	NO_CMD = "No command exists "
 	INVALID_NUMBEROF_ARGUMENTS = "Not enough arguments "
 	INVALID_ARGUMENT_TYPE = "Invalid arguments "
 	PARKING_LOT_NOT_INITIALIZED = "Parking lot not initialized "
@@ -67,8 +67,8 @@ func (c *Cli) execute(cmd string) error {
 		if err!=nil{
 			return err
 		}
-
 		fmt.Printf("Allocated slot number: %d\n", slotAssigned)
+
 	case STATUS:
 		if cmdLen != 1{
 			return  errors.New(INVALID_NUMBEROF_ARGUMENTS)
@@ -88,10 +88,80 @@ func (c *Cli) execute(cmd string) error {
 			if free, _ := slot.IsFree(); !free {
 				d, _ := slot.Distance()
 				v, _  := slot.GetVehicle()
-				fmt.Fprintf(w, "%d \t %s \t %s \t", d, v.RegistrationNumber(), v.Color())
+				fmt.Fprintf(w, "%d \t %s \t %s \t\n", d, strings.ToUpper(v.RegistrationNumber()),
+					strings.Title(v.Color()))
 			}
 		}
 		w.Flush()
+
+	case LEAVE:
+		if cmdLen != 2{
+			return  errors.New(INVALID_NUMBEROF_ARGUMENTS)
+		}else if c.isParkingLotManagerInit() == false{
+			return  errors.New(PARKING_LOT_NOT_INITIALIZED)
+		}
+
+		noSlot, err := strconv.Atoi(cmdSlice[1])
+		if err != nil {
+			return errors.New(INVALID_ARGUMENT_TYPE)
+		}
+
+		err = c.parkingLot.LeaveVehicle(noSlot)
+		if err != nil{
+			return err
+		}
+
+		fmt.Printf("Slot number %d is free\n", noSlot)
+
+	case VEHICLES_WITHCOLOR:
+		if cmdLen != 2{
+			return  errors.New(INVALID_NUMBEROF_ARGUMENTS)
+		}else if c.isParkingLotManagerInit() == false{
+			return  errors.New(PARKING_LOT_NOT_INITIALIZED)
+		}
+
+		slots, err := c.parkingLot.SlotsWithColor(cmdSlice[1])
+		if err != nil {
+			return err
+		}
+
+		var vehicles []string
+		for _, slot := range slots{
+			v, _ := slot.GetVehicle()
+			vehicles = append(vehicles, strings.ToUpper(v.RegistrationNumber()))
+		}
+		fmt.Println(strings.Join(vehicles, ", "))
+
+	case SLOTS_WITHCOLOR:
+		if cmdLen != 2{
+			return  errors.New(INVALID_NUMBEROF_ARGUMENTS)
+		}else if c.isParkingLotManagerInit() == false{
+			return  errors.New(PARKING_LOT_NOT_INITIALIZED)
+		}
+
+		slots, err := c.parkingLot.SlotsWithColor(cmdSlice[1])
+		if err != nil {
+			return err
+		}
+
+		var slotDistances []string
+		for _, slot := range slots{
+			d, _ := slot.Distance()
+			slotDistances = append(slotDistances, strconv.Itoa(d))
+		}
+		fmt.Println(strings.Join(slotDistances, ", "))
+
+	case SLOT_FOR_REG_NO:
+		if cmdLen != 2{
+			return  errors.New(INVALID_NUMBEROF_ARGUMENTS)
+		}else if c.isParkingLotManagerInit() == false{
+			return  errors.New(PARKING_LOT_NOT_INITIALIZED)
+		}
+		s, err := c.parkingLot.FindVehicleSlot(cmdSlice[1])
+		if err != nil{
+			return err
+		}
+		fmt.Printf("%d \n", s)
 
 	default:
 		fmt.Println("No command found")

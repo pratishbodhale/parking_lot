@@ -28,7 +28,7 @@ func (c *Cli) ProcessInput(reader io.Reader){
 	}
 
 	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "error:", err)
+		fmt.Print(err)
 		os.Exit(1)
 	}
 }
