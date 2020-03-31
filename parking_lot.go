@@ -17,6 +17,7 @@ type ParkingLotManager interface {
 const (
 	FULL_PARKING = "Sorry, parking lot is full "
 	NOT_FOUND = "Not found "
+	SLOT_OUT_OF_BOUND = "Invalid error, Slot out bound"
 )
 
 type parkingLotMgrImpl struct {
@@ -41,44 +42,71 @@ func (p *parkingLotMgrImpl) init(slots int) error {
 
 func (p *parkingLotMgrImpl) ParkVehicle(v vehicle.Vehicle) (int, error){
 	for _, s := range p.slots{
-		if isFree, _ := s.IsFree(); isFree {
-			s.ParkVehicle(v)
+		if isFree, err := s.IsFree(); err == nil && isFree {
+			if err = s.ParkVehicle(v); err != nil{
+				return -1, err
+			}
 			return s.Distance()
 		}
 	}
 	return -1, errors.New(FULL_PARKING)
 }
 
+// Returns slot where vehicle with a registration number is present
 func (p *parkingLotMgrImpl) FindVehicleSlot(registrationNumber string) (int, error){
 	for _, s := range p.slots{
-		if isFree, _ := s.IsFree(); !isFree {
+		v, err := s.GetVehicle()
 
-			v, _ := s.GetVehicle()
-			if v.RegistrationNumber() == registrationNumber{
-				return s.Distance()
-			}
+		// If err is that slot doesn't have a vehicle
+		if err != nil && err.Error()==slot.NO_VEHICLE {
+			continue
+
+		// Some other error like database load
+		} else if err!=nil{
+			return -1, err
+		}
+
+		// Vehicle found
+		if v.RegistrationNumber() == registrationNumber{
+			return s.Distance()
 		}
 	}
 	return -1, errors.New(NOT_FOUND)
 }
 
+// Unparks the vehicle
 func (p *parkingLotMgrImpl) LeaveVehicle(s int) error{
+	if len(p.slots) < s || s<1 {
+		return errors.New(SLOT_OUT_OF_BOUND)
+	}
 	return p.slots[s-1].Free()
 }
 
+// Returns status of all slots
+// Vehicle details can be accesed using slot methods
 func (p *parkingLotMgrImpl) Status() ([]slot.ParkingSlot, error){
 	return p.slots, nil
 }
 
+// Returns all slots that has vehicle of a given color
+// Vehicle details can be accesed using slot methods
 func (p *parkingLotMgrImpl) SlotsWithColor(color string) ([]slot.ParkingSlot, error){
 	var slots []slot.ParkingSlot
-	for _, s := range p.slots{
-		if isFree, _ := s.IsFree(); !isFree {
 
-			v, _ := s.GetVehicle()
-			if v.Color() == color{
-				slots = append(slots, s)
-			}
+	for _, s := range p.slots{
+		v, err := s.GetVehicle()
+
+		// If err is that slot doesn't have a vehicle
+		if err != nil && err.Error()==slot.NO_VEHICLE {
+			continue
+
+		// Some other error like database load
+		} else if err!=nil{
+			return nil, err
+		}
+
+		if v.Color() == color{
+			slots = append(slots, s)
 		}
 	}
 	if len(slots) == 0 {

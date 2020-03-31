@@ -5,6 +5,7 @@ import (
 	"example.com/parking_lot/vehicle"
 )
 
+//go:generate mockgen -destination=mock/slot.go -package=mock example.com/parking_lot/slot ParkingSlot
 type ParkingSlot interface {
 	IsFree() (bool, error)
 	Free() error

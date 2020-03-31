@@ -1,5 +1,6 @@
 package vehicle
 
+//go:generate mockgen -destination=mock/vehicle.go -package=mock example.com/parking_lot/vehicle Vehicle
 type Vehicle interface {
 	RegistrationNumber() string
 	Color() string

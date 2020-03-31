@@ -24,7 +24,7 @@ const (
 
 const (
 	NO_CMD = "No command exists "
-	INVALID_NUMBEROF_ARGUMENTS = "Not enough arguments "
+	INVALID_NUMBEROF_ARGUMENTS = "Invalid number of arguments "
 	INVALID_ARGUMENT_TYPE = "Invalid arguments "
 	PARKING_LOT_NOT_INITIALIZED = "Parking lot not initialized "
 )
@@ -84,12 +84,17 @@ func (c *Cli) execute(cmd string) error {
 		const padding = 3
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, padding, ' ', 0)
 		fmt.Fprintln(w, "Slot No.\tRegistration No\tColour\t")
-		for _, slot := range slotsStatus{
+		for dist, slot := range slotsStatus{
 			if free, _ := slot.IsFree(); !free {
-				d, _ := slot.Distance()
+
+				// Ignoring error as We have already checked if slot is not free
+				// In current situation there can't be any other error
 				v, _  := slot.GetVehicle()
-				fmt.Fprintf(w, "%d \t %s \t %s \t\n", d, strings.ToUpper(v.RegistrationNumber()),
-					strings.Title(v.Color()))
+				if _, err = fmt.Fprintf(w, "%d \t %s \t %s \t\n", dist+1 , strings.ToUpper(v.RegistrationNumber()),
+					strings.Title(v.Color())); err != nil{
+						return err
+				}
+
 			}
 		}
 		w.Flush()
