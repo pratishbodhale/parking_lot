@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Get all dependencies
+echo "Getting all dependencies"
+go mod tidy
+
+
+# Build the binary
+echo "Building the binary"
+go build -o bin/parking_lot ./cmd/main.go
+
+
+# Run unit tests
+echo "Running unit tests"
+go test ./...
+
+
+# Run functional tests
+echo "Running functional tests"
+./bin/run_functional_tests

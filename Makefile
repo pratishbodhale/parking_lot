@@ -2,4 +2,7 @@
 #!make
 
 build:
-	go build -o parking_lot cmd/main.go
+	go build -o bin/parking_lot cmd/main.go
+
+test:
+	go test ./...

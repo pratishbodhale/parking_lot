@@ -76,7 +76,7 @@ func TestParkingSlotImpl_GetVehicle(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Get vehicle when it is parked
-	actualV , err := slot.GetVehicle()
+	actualV, err := slot.GetVehicle()
 	assert.Nil(t, err)
 	assert.EqualValues(t, actualV, expV)
 

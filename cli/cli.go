@@ -1,47 +1,48 @@
 package cli
 
 import (
-	"bufio"
-	"example.com/parking_lot"
-	"fmt"
-	"io"
-	"os"
+	"errors"
 	"strings"
 )
 
 type Cli struct {
-	parkingLot parking_lot.ParkingLotManager
+	cmd command
 }
 
-func NewCli() *Cli{
+func NewCli() *Cli {
 	c := new(Cli)
+	c.cmd = command{}
 	return c
 }
 
-func (c *Cli) ProcessInput(reader io.Reader){
-	scanner := bufio.NewScanner(reader)
-	for scanner.Scan() {
-		command := strings.ToLower(scanner.Text())
-		if err := c.execute(command); err != nil{
-			fmt.Println(err)
-		}
-	}
+func (c *Cli) Execute(cmd string) (string, error) {
+	cmdSlice := strings.Split(cmd, " ")
 
-	if err := scanner.Err(); err != nil {
-		fmt.Print(err)
-		os.Exit(1)
-	}
-}
+	execCommand := cmdSlice[0]
+	args := cmdSlice[1:]
 
-func (c *Cli) ProcessFile(filePath string){
-	f, err := os.Open(filePath)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	c.ProcessInput(f)
-}
+	switch execCommand {
+	case CREATE_PARKING_LOT:
+		return c.cmd.createParkingLot(args)
+	case PARK:
+		return c.cmd.park(args)
 
-func (c *Cli) ProcessStdIn(){
-	c.ProcessInput(os.Stdin)
+	case STATUS:
+		return c.cmd.status(args)
+
+	case LEAVE:
+		return c.cmd.leave(args)
+
+	case VEHICLES_WITHCOLOR:
+		return c.cmd.vehiclesWithColor(args)
+
+	case SLOTS_WITHCOLOR:
+		return c.cmd.slotsWithColor(args)
+
+	case SLOT_FOR_REG_NO:
+		return c.cmd.slotForRegNo(args)
+
+	default:
+		return "", errors.New(NO_CMD)
+	}
 }

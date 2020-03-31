@@ -45,7 +45,9 @@ func TestParkingLotMgrImpl_FindVehicleSlot(t *testing.T) {
 	}).Times(1)
 
 	slots := []slot.ParkingSlot{slotMock}
-	pm := parkingLotMgrImpl{ slots}
+	pm := parkingLotMgrImpl{slots}
+
+	// Executing the function with different cases
 
 	// CASE: No vehicles in slot
 	_, err := pm.FindVehicleSlot("rno2")
@@ -67,12 +69,14 @@ func TestParkingLotMgrImpl_LeaveVehicle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	slotMock := mock.NewMockParkingSlot(ctrl)
 
-	slotMock.EXPECT().Free().DoAndReturn(func() error{
+	slotMock.EXPECT().Free().DoAndReturn(func() error {
 		return nil
 	}).Times(1)
 
 	slots := []slot.ParkingSlot{slotMock}
-	pm := parkingLotMgrImpl{ slots}
+	pm := parkingLotMgrImpl{slots}
+
+	// Executing the function with different cases
 
 	// CASE: Invalid input
 	err := pm.LeaveVehicle(0)
@@ -94,7 +98,7 @@ func TestParkingLotMgrImpl_ParkVehicle(t *testing.T) {
 	countIsFree := -1
 	slotMock.EXPECT().IsFree().DoAndReturn(func() (bool, error) {
 		countIsFree++
-		if countIsFree == 0{
+		if countIsFree == 0 {
 			return false, nil
 		}
 		return true, nil
@@ -102,21 +106,23 @@ func TestParkingLotMgrImpl_ParkVehicle(t *testing.T) {
 
 	countPark := -1
 	errParking := errors.New("Unable to park vehicle ")
-	slotMock.EXPECT().ParkVehicle(gomock.Any()).DoAndReturn(func(vehicle.Vehicle) error{
+	slotMock.EXPECT().ParkVehicle(gomock.Any()).DoAndReturn(func(vehicle.Vehicle) error {
 		countPark++
-		if countPark == 0{
+		if countPark == 0 {
 			return errParking
 		}
 		return nil
 	}).Times(2)
 
-	expSlot:= 1
+	expSlot := 1
 	slotMock.EXPECT().Distance().DoAndReturn(func() (int, error) {
 		return expSlot, nil
 	}).Times(1)
 
 	slots := []slot.ParkingSlot{slotMock}
-	pm := parkingLotMgrImpl{ slots}
+	pm := parkingLotMgrImpl{slots}
+
+	// Executing the function with different cases
 
 	// CASE: No slots free
 	_, err := pm.ParkVehicle(v)
@@ -129,7 +135,7 @@ func TestParkingLotMgrImpl_ParkVehicle(t *testing.T) {
 	assert.EqualValues(t, err.Error(), errParking.Error())
 
 	// CASE: Success
-	actualSlot , err := pm.ParkVehicle(v)
+	actualSlot, err := pm.ParkVehicle(v)
 	assert.Nil(t, err)
 	assert.EqualValues(t, expSlot, actualSlot)
 }
@@ -159,7 +165,9 @@ func TestParkingLotMgrImpl_SlotsWithColor(t *testing.T) {
 	}).Times(1)
 
 	slots := []slot.ParkingSlot{slotMock}
-	pm := parkingLotMgrImpl{ slots}
+	pm := parkingLotMgrImpl{slots}
+
+	// Executing the function with different cases
 
 	// CASE: No vehicles in slot
 	_, err := pm.SlotsWithColor("blue")
